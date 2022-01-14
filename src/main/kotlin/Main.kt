@@ -58,4 +58,18 @@ fun main(args: Array<String>) {
 
     val countries = arrayOf("Belgium", "Germany", "Hungary", "Netherlands")
     visited("I miss", *countries) // spread operator, allow array as param
+
+    val person = Person()
+    println("name: ${person.name}, age: ${person.age}")
+
+    person.nickname = "Mongs"
+    person.nickname = "Nandez"
+
+    println(person.nickname)
+
+    val person2 = Person("Octávio", 18)
+    person2.printInfo()
+
+    person2.nickname = "Pirralho"
+    person2.printInfo()
 }
