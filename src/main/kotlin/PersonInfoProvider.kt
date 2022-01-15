@@ -19,9 +19,10 @@ interface SessionInfoProvider {
     fun getSessionId() : String
 }
 
-// basicInfoProvider implements PersonInfoProvider
+// basicInfoProvider implements PersonInfoProvider and SessionInfoProvider
 // abstract -> doesn't need to implement all included interfaces available methods, it cannot be instantiated
-class BasicInfoProvider : PersonInfoProvider, SessionInfoProvider {
+// final -> it can not be inherited from
+open class BasicInfoProvider : PersonInfoProvider, SessionInfoProvider {
     override val providerInfo: String
         get() = "BasicInfoProvider"
 
@@ -30,15 +31,30 @@ class BasicInfoProvider : PersonInfoProvider, SessionInfoProvider {
         println("override")
     }
 
+    // protected open -> works for inheritance, but it is not public
+    protected open val sessionIdPrefix = "Session"
+
     override fun getSessionId(): String {
-        return "Session ID"
+        return sessionIdPrefix
     }
 }
 
 fun main() {
-    val provider = BasicInfoProvider()
+    val provider = FancyInfoProvider()
     provider.printInfo(Person())
-    println(provider.getSessionId())
+    // println(provider.getSessionId())
+    checkTypes((provider))
+
+    // object expression -> kind of anonymous class
+    val objectExpression = object : PersonInfoProvider {
+        override val providerInfo: String
+            get() = "New Info Provider"
+
+        fun getSessionId() = "id"
+    }
+
+    objectExpression.printInfo(Person())
+    objectExpression.getSessionId()
 }
 
 fun checkTypes(infoProvider: PersonInfoProvider) {
@@ -47,7 +63,7 @@ fun checkTypes(infoProvider: PersonInfoProvider) {
     } else {
         println("is a session info provider")
         // (infoProvider as SessionInfoProvider).getSessionId()
-        infoProvider.getSessionId() // implicit casting, since we have already verified type with if conditional
+        println(infoProvider.getSessionId()) // implicit casting, since we have already verified type with if conditional
     }
 
 }
