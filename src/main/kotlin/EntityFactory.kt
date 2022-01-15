@@ -67,6 +67,13 @@ sealed class OneMoreEntity() {
     data class Hard(val id: String, val name: String, val multiplier: Float): OneMoreEntity()
 }
 
+fun OneMoreEntity.Medium.outFunction(): String { // extension method
+    return "I got created outside"
+}
+
+val OneMoreEntity.Medium.outProperty: String // extension property
+    get() = "I also got created outside"
+
 fun main() {
     // val entity = Entity() -> error; private constructor
     // val entity = Entity.Companion.create()
@@ -91,11 +98,9 @@ fun main() {
 
     // val entity1 = EntityFactory.create(EntityType.EASY)
     // val entity2 = EntityFactory.create(EntityType.EASY)
-    val entity1 = OneMoreEntity.Easy("id","name")
-    var entity2 = OneMoreEntity.Easy("id","name")
-
-    entity2 = entity1.copy() // copy() is accessible because this is a data class
-    entity2 = entity1.copy(name = "Victor")
+    val entity1 = OneMoreEntity.Medium("id","name")
+    // var entity2 = OneMoreEntity.Medium("id","name")
+    val entity2 = entity1.copy(name = "Victor") // copy() is accessible because this is a data class
 
     // === -> check is reference is the same; exact same object
     // == -> other object that has same data
@@ -104,4 +109,7 @@ fun main() {
     } else {
         println("they are not equal")
     }
+
+    println(entity1.outFunction())
+    println(entity1.outProperty)
 }
