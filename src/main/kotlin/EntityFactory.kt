@@ -1,3 +1,5 @@
+import java.util.*
+
 interface IdProvider {
     fun getId(): String
 }
@@ -14,8 +16,30 @@ class Entity private constructor(val id: String) {
     }
 }
 
+enum class EntityType {
+    HELP, EASY, MEDIUM, HARD;
+
+    fun getPrettyName() = name.lowercase().capitalize() // deprecated but still works - jan/2022
+}
+
 object EntityFactory {
-    fun create() = OtherEntity("1808", "Octávio")
+    fun create(type: EntityType): /* OtherEntity */ OneMoreEntity {
+        val id = UUID.randomUUID().toString()
+        val name = when(type) {
+            EntityType.EASY -> type.name // match the exact name of the class -> EASY
+            EntityType.MEDIUM -> type.getPrettyName()
+            EntityType.HARD -> "Hard"
+            EntityType.HELP -> type.getPrettyName()
+        }
+        // return OtherEntity(id, name)
+
+        return when(type) {
+            EntityType.EASY -> OneMoreEntity.Easy(id, name)
+            EntityType.MEDIUM -> OneMoreEntity.Medium(id, name)
+            EntityType.HARD -> OneMoreEntity.Hard(id, name, 2f)
+            EntityType.HELP -> OneMoreEntity.Help
+        }
+    }
 }
 
 class OtherEntity(val id: String, val name: String) {
@@ -24,12 +48,60 @@ class OtherEntity(val id: String, val name: String) {
     }
 }
 
+// sealed -> can't directly instantiate sealed classes
+sealed class OneMoreEntity() {
+    object Help : OneMoreEntity() {
+        val name = "Help"
+    }
+
+    data class Easy(val id: String, val name: String): OneMoreEntity() {
+        override fun equals(other: Any?): Boolean {
+            return super.equals(other)
+        }
+
+        override fun hashCode(): Int {
+            return super.hashCode()
+        }
+    }
+    data class Medium(val id: String, val name: String): OneMoreEntity()
+    data class Hard(val id: String, val name: String, val multiplier: Float): OneMoreEntity()
+}
+
 fun main() {
     // val entity = Entity() -> error; private constructor
     // val entity = Entity.Companion.create()
     val entity = Entity.create() // in Kotlin, we can omit Companion
     println(entity.id)
 
-    val otherEntity = EntityFactory.create()
-    println(otherEntity)
+    val easyEntity = EntityFactory.create(EntityType.EASY)
+    val mediumEntity = EntityFactory.create(EntityType.MEDIUM)
+    val hardEntity = EntityFactory.create(EntityType.HARD)
+    println(easyEntity)
+    println(mediumEntity)
+    println(hardEntity)
+
+    val message = when(EntityFactory.create(EntityType.HELP)) {
+        OneMoreEntity.Help -> "Help Class"
+        is OneMoreEntity.Easy -> "Easy Class"
+        is OneMoreEntity.Medium -> "Medium Class"
+        is OneMoreEntity.Hard -> "Hard Class"
+
+    }
+    println(message)
+
+    // val entity1 = EntityFactory.create(EntityType.EASY)
+    // val entity2 = EntityFactory.create(EntityType.EASY)
+    val entity1 = OneMoreEntity.Easy("id","name")
+    var entity2 = OneMoreEntity.Easy("id","name")
+
+    entity2 = entity1.copy() // copy() is accessible because this is a data class
+    entity2 = entity1.copy(name = "Victor")
+
+    // === -> check is reference is the same; exact same object
+    // == -> other object that has same data
+    if (entity1 == entity2) {
+        println("they are equal")
+    } else {
+        println("they are not equal")
+    }
 }
